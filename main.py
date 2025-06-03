@@ -51,71 +51,61 @@ async def upload_image(file: UploadFile = File(...)):
 
         # Prompt para IA
         prompt = f"""
-Você receberá o texto extraído de um rótulo de um produto alimentício (como leite, iogurte, bebida vegetal, etc.).  
-Sua tarefa é organizar **somente as informações que aparecem explicitamente** nesse texto, no formato JSON abaixo.
+Você receberá o texto extraído por OCR de um rótulo de produto alimentício.
 
-⚠️ **Importante:**
-- Não invente informações que não estão no texto.
-- Não complete campos com base em suposições.
-- Se algo não estiver claro ou estiver faltando, **deixe o campo em branco ou omita**.
+Sua tarefa é montar um JSON com os dados **somente se estiverem claramente presentes** no texto.  
+Caso não consiga identificar uma informação, **deixe o campo em branco ou omita**.  
+Não invente, não deduza, e não use conhecimento externo.
 
-🧠 **Sobre os ingredientes:**
-- Liste **cada ingrediente separadamente**.
-- O campo `"name"` deve conter o nome do ingrediente com a **primeira letra maiúscula**, mesmo que no texto OCR esteja em minúsculo.
-- A `"description"` deve explicar, se possível, a função ou papel do ingrediente no produto.
-- Se a descrição não puder ser determinada com segurança, pode deixar em branco.
-- O campo `"safe"` deve ser definido como `true`, a menos que o ingrediente seja claramente identificado como perigoso ou alergênico.
+⚠️ **Sobre os ingredientes:**
+- Liste apenas ingredientes visíveis no texto.
+- Cada ingrediente deve ser um item separado no array `"ingredients"`.
+- O campo `"name"` deve começar com letra maiúscula, mesmo que no OCR apareça em minúsculo.
+- O campo `"description"` deve explicar a função, se puder ser inferida com clareza.
+- O campo `"safe"` deve ser `true`, a menos que haja **indicação clara** de risco.
 
-🧪 **Sobre os dados nutricionais:**
-- Extraia pares como: `"Valor energético": "130 kcal"`, `"Categoria": "por porção"`.
-- Só inclua dados que realmente estiverem presentes no OCR.
+⚠️ **Sobre os dados nutricionais:**
+- Copie exatamente como estiver no texto.
+- Exemplo: `"Valor energético": "130 kcal"`, `"Categoria": "por porção"`.
 
-📝 **Formato esperado:**
+⚠️ **Seções adicionais:**
+- `"claims"` → Frases de marketing como "Fonte de cálcio", "Zero lactose".
+- `"warnings"` → Avisos como "Contém leite", "Pode conter soja".
+- `"servingSize"` → Porções.
+- `"storageInstructions"` → Instruções de conservação.
+
+📌 **Exemplo de estrutura esperada:**
 
 {{
   "productName": "",
   "brand": "",
   "ingredients": [
     {{
-      "name": "",             // Sempre começar com letra maiúscula
-      "description": "",
+      "name": "Leite Integral",
+      "description": "Ingrediente principal, rico em cálcio e proteína.",
       "safe": true
     }}
   ],
   "nutrition": [
     {{
-      "label": "",
-      "value": "",
-      "category": ""
+      "label": "Valor energético",
+      "value": "130 kcal",
+      "category": "por porção"
     }}
   ],
   "additionalInfo": {{
-    "claims": [],                  // Ex: "Fonte de cálcio", "Sem lactose"
-    "warnings": [],                // Ex: "Contém derivados de leite"
-    "servingSize": "",            // Ex: "200 ml"
-    "storageInstructions": ""     // Ex: "Manter refrigerado após aberto"
+    "claims": ["Fonte de cálcio"],
+    "warnings": ["Contém lactose"],
+    "servingSize": "200 ml",
+    "storageInstructions": "Manter refrigerado após aberto"
   }}
 }}
 
-📌 **Exemplo válido de ingredients:**
-
-"ingredients": [
-  {{
-    "name": "Leite integral",
-    "description": "Ingrediente principal do produto, fonte de proteína e cálcio.",
-    "safe": true
-  }},
-  {{
-    "name": "Trifosfato pentassódico",
-    "description": "Estabilizante utilizado para manter a textura do leite.",
-    "safe": true
-  }}
-]
-
-### Texto OCR:
+📄 **Texto OCR a ser interpretado:**
 
 \"\"\"{ocr_text}\"\"\"
 """
+
 
 
 
