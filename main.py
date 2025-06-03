@@ -51,50 +51,33 @@ async def upload_image(file: UploadFile = File(...)):
 
         # Prompt para IA
         prompt = f"""
-Você receberá o texto extraído de um rótulo de leite. Organize as informações no seguinte formato JSON, utilizando **somente dados reais do texto**.
+Você receberá o texto extraído de um rótulo de um produto alimentício (como leite, iogurte, bebida vegetal, etc.).  
+Sua tarefa é organizar **somente as informações que aparecem explicitamente** nesse texto, no formato JSON abaixo.
 
-Cada ingrediente deve ser listado separadamente no array "ingredients", e a "description" deve explicar a função ou o papel de cada ingrediente no produto, sempre que possível.
+⚠️ **Importante:**
+- Não invente informações que não estão no texto.
+- Não complete campos com base em suposições.
+- Se algo não estiver claro ou estiver faltando, **deixe o campo em branco ou omita**.
 
-Exemplo de como deve ficar o campo ingredients:
+🧠 **Sobre os ingredientes:**
+- Liste **cada ingrediente separadamente**.
+- O campo `"name"` deve conter o nome do ingrediente com a **primeira letra maiúscula**, mesmo que no texto OCR esteja em minúsculo.
+- A `"description"` deve explicar, se possível, a função ou papel do ingrediente no produto.
+- Se a descrição não puder ser determinada com segurança, pode deixar em branco.
+- O campo `"safe"` deve ser definido como `true`, a menos que o ingrediente seja claramente identificado como perigoso ou alergênico.
 
-"ingredients": [
-  {{
-    "name": "Leite integral",
-    "description": "Ingrediente principal do produto, fonte de proteína e cálcio.",
-    "safe": true
-  }},
-  {{
-    "name": "trifosfato pentassódico",
-    "description": "Estabilizante utilizado para manter a textura do leite UHT.",
-    "safe": true
-  }},
-  {{
-    "name": "citrato trissódico",
-    "description": "Ingrediente usado para estabilizar o leite durante o armazenamento.",
-    "safe": true
-  }},
-  {{
-    "name": "di-hidrogenofosfato de sódio",
-    "description": "Auxilia na preservação da qualidade do leite UHT.",
-    "safe": true
-  }},
-  {{
-    "name": "difosfato dissódico",
-    "description": "Conservante para ajudar a manter a textura e a cor do leite.",
-    "safe": true
-  }}
-]
+🧪 **Sobre os dados nutricionais:**
+- Extraia pares como: `"Valor energético": "130 kcal"`, `"Categoria": "por porção"`.
+- Só inclua dados que realmente estiverem presentes no OCR.
 
-Use apenas os ingredientes que aparecem no texto OCR e explique cada um individualmente. NÃO agrupe vários ingredientes em um único item.
-
-Aqui está o formato esperado:
+📝 **Formato esperado:**
 
 {{
   "productName": "",
   "brand": "",
   "ingredients": [
     {{
-      "name": "",
+      "name": "",             // Sempre começar com letra maiúscula
       "description": "",
       "safe": true
     }}
@@ -107,16 +90,33 @@ Aqui está o formato esperado:
     }}
   ],
   "additionalInfo": {{
-    "claims": [],
-    "warnings": [],
-    "servingSize": "",
-    "storageInstructions": ""
+    "claims": [],                  // Ex: "Fonte de cálcio", "Sem lactose"
+    "warnings": [],                // Ex: "Contém derivados de leite"
+    "servingSize": "",            // Ex: "200 ml"
+    "storageInstructions": ""     // Ex: "Manter refrigerado após aberto"
   }}
 }}
 
-Texto OCR:
+📌 **Exemplo válido de ingredients:**
+
+"ingredients": [
+  {{
+    "name": "Leite integral",
+    "description": "Ingrediente principal do produto, fonte de proteína e cálcio.",
+    "safe": true
+  }},
+  {{
+    "name": "Trifosfato pentassódico",
+    "description": "Estabilizante utilizado para manter a textura do leite.",
+    "safe": true
+  }}
+]
+
+### Texto OCR:
+
 \"\"\"{ocr_text}\"\"\"
 """
+
 
 
         response = client.chat.completions.create(
