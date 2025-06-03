@@ -57,24 +57,25 @@ Sua tarefa é montar um JSON com os dados **somente se estiverem claramente pres
 Caso não consiga identificar uma informação, **deixe o campo em branco ou omita**.  
 Não invente, não deduza, e não use conhecimento externo.
 
-⚠️ **Sobre os ingredientes:**
+ **Sobre os ingredientes:**
 - Liste apenas ingredientes visíveis no texto.
 - Cada ingrediente deve ser um item separado no array `"ingredients"`.
 - O campo `"name"` deve começar com letra maiúscula, mesmo que no OCR apareça em minúsculo.
-- O campo `"description"` deve explicar a função, se puder ser inferida com clareza.
-- O campo `"safe"` deve ser `true`, a menos que haja **indicação clara** de risco.
+- O campo `"description"` deve **explicar de forma simples e acessível a função ou o papel do ingrediente no produto**, como se fosse para uma pessoa leiga entender.
+  - Exemplo: "Ajuda a conservar o produto por mais tempo" ou "Serve para dar mais cremosidade".
+- O campo `"safe"` deve ser `true`, a menos que haja **indicação clara** de risco (como avisos de alergia).
 
-⚠️ **Sobre os dados nutricionais:**
+ **Sobre os dados nutricionais:**
 - Copie exatamente como estiver no texto.
 - Exemplo: `"Valor energético": "130 kcal"`, `"Categoria": "por porção"`.
 
-⚠️ **Seções adicionais:**
+ **Seções adicionais:**
 - `"claims"` → Frases de marketing como "Fonte de cálcio", "Zero lactose".
 - `"warnings"` → Avisos como "Contém leite", "Pode conter soja".
-- `"servingSize"` → Porções.
-- `"storageInstructions"` → Instruções de conservação.
+- `"servingSize"` → Porções (ex: "200 ml").
+- `"storageInstructions"` → Instruções de conservação (ex: "Manter refrigerado após aberto").
 
-📌 **Exemplo de estrutura esperada:**
+ **Exemplo de estrutura esperada:**
 
 {{
   "productName": "",
@@ -83,6 +84,11 @@ Não invente, não deduza, e não use conhecimento externo.
     {{
       "name": "Leite Integral",
       "description": "Ingrediente principal, rico em cálcio e proteína.",
+      "safe": true
+    }},
+    {{
+      "name": "Estabilizante trifosfato pentassódico",
+      "description": "Ajuda a manter a textura e aparência do produto.",
       "safe": true
     }}
   ],
@@ -101,10 +107,11 @@ Não invente, não deduza, e não use conhecimento externo.
   }}
 }}
 
-📄 **Texto OCR a ser interpretado:**
+ **Texto OCR a ser interpretado:**
 
 \"\"\"{ocr_text}\"\"\"
 """
+
 
 
 
